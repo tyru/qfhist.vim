@@ -18,8 +18,8 @@ let s:qfhist_source = {
 
 function! s:qfhist_source.gather_candidates(args, context)
     return map(qfsavehist#get_histories(), '{
-    \ "word" : printf("[%d] %s", v:key + 1, v:val.title),
-    \ "abbr" : printf("[%d] %s", v:key + 1, v:val.title),
+    \ "word" : printf("[%d] %s", v:key + 1, v:val.qftitle),
+    \ "abbr" : printf("[%d] %s", v:key + 1, v:val.qftitle),
     \ "action__command" : "call qfsavehist#set_history(".(v:key+1).")",
     \ }')
 endfunction
@@ -34,8 +34,8 @@ let s:qfhist_local_source = {
 
 function! s:qfhist_local_source.gather_candidates(args, context)
     return map(qfsavehist#get_local_histories(), '{
-    \ "word" : printf("[%d] %s", v:key + 1, v:val.title),
-    \ "abbr" : printf("[%d] %s", v:key + 1, v:val.title),
+    \ "word" : printf("[%d] %s", v:key + 1, v:val.qftitle),
+    \ "abbr" : printf("[%d] %s", v:key + 1, v:val.qftitle),
     \ "action__command" : "call qfsavehist#set_local_history(" . v:key . ")",
     \ }')
 endfunction

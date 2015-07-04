@@ -43,33 +43,35 @@ function! qfsavehist#save() abort
         return
     endif
     if s:is_location_list()
-        call qfsavehist#save_loclist()
+        call qfsavehist#save_loclist(0, w:quickfix_title)
     else
         call qfsavehist#save_qflist()
     endif
 endfunction
 
 function! qfsavehist#save_qflist() abort
-    call s:save_history(s:, 'histories',
-    \                   getqflist(), g:qfsavehist_max_history_count)
+    call s:save_history(s:histories,
+    \   getqflist(), g:qfsavehist_max_history_count, w:quickfix_title)
 endfunction
 
-function! qfsavehist#save_loclist(winnr) abort
-    call s:save_history(w:, 'qfsavehist_histories',
-    \                   getloclist(a:winnr), g:qfsavehist_max_history_count)
-endfunction
-
-" TODO: Support w:quickfix_title backward compatibility?
-function! s:save_history(scope, varname, qflist, hist_count) abort
-    if !has_key(a:scope, a:varname)
-        let a:scope[a:varname] = []
+" TODO: Is there a way to get location-list's
+" quickfix_title ({qftitle}) which belongs to {winnr} ?
+function! qfsavehist#save_loclist(winnr, qftitle) abort
+    let NO_ITEM = []
+    if getwinvar(a:winnr, 'qfsavehist_histories', NO_ITEM) is NO_ITEM
+        call setwinvar(a:winnr, 'qfsavehist_histories', [])
     endif
-    let a:scope[a:varname] = [{
+    call s:save_history(getwinvar(a:winnr, 'qfsavehist_histories'),
+    \   getloclist(a:winnr), g:qfsavehist_max_history_count, a:qftitle)
+endfunction
+
+function! s:save_history(histories, qflist, hist_count, qftitle) abort
+    call insert(a:histories, {
     \   'qflist' : a:qflist,
-    \   'title' : w:quickfix_title,
-    \}] + a:scope[a:varname]
-    if len(a:scope[a:varname]) > a:hist_count
-        let a:scope[a:varname] = a:scope[a:varname][: a:hist_count - 1]
+    \   'qftitle' : a:qftitle,
+    \})
+    if len(a:histories) > a:hist_count
+        call remove(a:histories, a:hist_count-1, -1)
     endif
 endfunction
 
@@ -99,10 +101,10 @@ function! qfsavehist#set_history(histnr, ...) abort
     let args = [history.qflist] + a:000
     let ret = call('setqflist', args)
     if &filetype ==# 'qf'
-        call s:set_quickfix_title(history.title)
+        call s:set_quickfix_title(history.qftitle)
     else
         execute 'autocmd qfsavehist-temp WinEnter *'
-        \       'call s:set_quickfix_title(' . string(history.title) . ')'
+        \       'call s:set_quickfix_title(' . string(history.qftitle) . ')'
     endif
     return ret
 endfunction
@@ -130,10 +132,10 @@ function! qfsavehist#set_local_history(winnr, histnr, ...) abort
     let args = [a:winnr, history.qflist] + a:000
     let ret = call('setloclist', args)
     if &filetype ==# 'qf'
-        call s:set_quickfix_title(history.title)
+        call s:set_quickfix_title(history.qftitle)
     else
         execute 'autocmd qfsavehist-temp WinEnter *'
-        \       'call s:set_quickfix_title(' . string(history.title) . ')'
+        \       'call s:set_quickfix_title(' . string(history.qftitle) . ')'
     endif
     return ret
 endfunction
@@ -145,9 +147,9 @@ function! s:is_location_list() abort
     return 0
 endfunction
 
-function! s:set_quickfix_title(title) abort
+function! s:set_quickfix_title(qftitle) abort
     if &filetype ==# 'qf'
-        let w:quickfix_title = a:title
+        let w:quickfix_title = a:qftitle
         autocmd! qfsavehist-temp
     endif
 endfunction
@@ -160,15 +162,15 @@ function! qfsavehist#__cmd_complete__(arglead, cmdline, cursorpos) abort
         let histories = is_local ? qfsavehist#get_local_histories() :
         \                          qfsavehist#get_histories()
         return map(histories, '
-        \   printf("%d - %s", v:key+1, v:val.title)
+        \   printf("%d - %s", v:key+1, v:val.qftitle)
         \')
     elseif cmdline !~# '^\d\+ - '
         let histories = is_local ? qfsavehist#get_local_histories() :
         \                          qfsavehist#get_histories()
         call map(histories, 'extend(v:val, {"_histnr" : v:key+1})')
-        call filter(histories, 'v:val.title =~? a:arglead')
+        call filter(histories, 'v:val.qftitle =~? a:arglead')
         return map(histories, '
-        \   printf("%d - %s", v:val._histnr, v:val.title)
+        \   printf("%d - %s", v:val._histnr, v:val.qftitle)
         \')
     endif
 endfunction
