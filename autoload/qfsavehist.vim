@@ -14,7 +14,27 @@ augroup END
 let s:histories = []
 
 function! qfsavehist#clear() abort
+    if &filetype !=# 'qf'
+        call s:error('qfsavehist#clear() must be called in quickfix window!!')
+        return
+    endif
+    if s:is_location_list()
+        call qfsavehist#clear_loclist(0)
+    else
+        call qfsavehist#clear_qflist()
+    endif
+endfunction
+
+function! qfsavehist#clear_qflist() abort
     let s:histories = []
+endfunction
+
+function! qfsavehist#clear_loclist(winnr) abort
+    let NO_ITEM = []
+    if getwinvar(a:winnr, 'qfsavehist_histories', NO_ITEM) is NO_ITEM
+        return
+    endif
+    call setwinvar(a:winnr, 'qfsavehist_histories', [])
 endfunction
 
 function! qfsavehist#save() abort
