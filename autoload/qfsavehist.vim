@@ -103,8 +103,7 @@ function! qfsavehist#set_history(histnr, ...) abort
     if &filetype ==# 'qf'
         call s:set_quickfix_title(history.qftitle)
     else
-        execute 'autocmd qfsavehist-temp WinEnter *'
-        \       'call s:set_quickfix_title(' . string(history.qftitle) . ')'
+        call s:set_quickfix_title_later(history.qftitle)
     endif
     return ret
 endfunction
@@ -134,8 +133,7 @@ function! qfsavehist#set_local_history(winnr, histnr, ...) abort
     if &filetype ==# 'qf'
         call s:set_quickfix_title(history.qftitle)
     else
-        execute 'autocmd qfsavehist-temp WinEnter *'
-        \       'call s:set_quickfix_title(' . string(history.qftitle) . ')'
+        call s:set_quickfix_title_later(history.qftitle)
     endif
     return ret
 endfunction
@@ -152,6 +150,12 @@ function! s:set_quickfix_title(qftitle) abort
         let w:quickfix_title = a:qftitle
         autocmd! qfsavehist-temp
     endif
+endfunction
+
+function! s:set_quickfix_title_later(qftitle) abort
+    autocmd! qfsavehist-temp
+    execute 'autocmd qfsavehist-temp WinEnter *'
+    \       'call s:set_quickfix_title(' . string(a:qftitle) . ')'
 endfunction
 
 
