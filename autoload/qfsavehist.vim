@@ -63,17 +63,19 @@ function! qfsavehist#get_local_histories() abort
 endfunction
 
 function! qfsavehist#get_history(histnr) abort
-    if a:histnr < 0 || a:histnr >= len(s:histories)
+    let histidx = a:histnr - 1
+    if histidx < 0 || histidx >= len(s:histories)
         throw 'qfsavehist: out of range.'
     endif
-    return s:histories[a:histnr]
+    return s:histories[histidx]
 endfunction
 
 function! qfsavehist#set_history(histnr, ...) abort
-    if a:histnr < 0 || a:histnr >= len(s:histories)
+    let histidx = a:histnr - 1
+    if histidx < 0 || histidx >= len(s:histories)
         throw 'qfsavehist: out of range.'
     endif
-    let history = s:histories[a:histnr]
+    let history = s:histories[histidx]
     let args = [history.qflist] + a:000
     let ret = call('setqflist', args)
     if &filetype ==# 'qf'
@@ -89,20 +91,22 @@ function! qfsavehist#get_local_history(histnr) abort
     if !exists('w:qfsavehist_histories')
         throw 'qfsavehist: no histories.'
     endif
-    if a:histnr < 0 || a:histnr >= len(w:qfsavehist_histories)
+    let histidx = a:histnr - 1
+    if histidx < 0 || histidx >= len(w:qfsavehist_histories)
         throw 'qfsavehist: out of range.'
     endif
-    return w:qfsavehist_histories[a:histnr]
+    return w:qfsavehist_histories[histidx]
 endfunction
 
 function! qfsavehist#set_local_history(winnr, histnr, ...) abort
     if !exists('w:qfsavehist_histories')
         throw 'qfsavehist: no histories.'
     endif
-    if a:histnr < 0 || a:histnr >= len(w:qfsavehist_histories)
+    let histidx = a:histnr - 1
+    if histidx < 0 || histidx >= len(w:qfsavehist_histories)
         throw 'qfsavehist: out of range.'
     endif
-    let history = w:qfsavehist_histories[a:histnr]
+    let history = w:qfsavehist_histories[histidx]
     let args = [a:winnr, history.qflist] + a:000
     let ret = call('setloclist', args)
     if &filetype ==# 'qf'
@@ -125,6 +129,27 @@ function! s:set_quickfix_title(title) abort
     if &filetype ==# 'qf'
         let w:quickfix_title = a:title
         autocmd! qfsavehist-temp
+    endif
+endfunction
+
+
+function! qfsavehist#__cmd_complete__(arglead, cmdline, cursorpos) abort
+    let [cmd, cmdline] = matchlist(a:cmdline, '^\s*\(\w\+\)\s\+\(.*\)')[1:2]
+    let is_local = cmd ==# 'QFSetLocalHistory'
+    if cmdline ==# ''
+        let histories = is_local ? qfsavehist#get_local_histories() :
+        \                          qfsavehist#get_histories()
+        return map(histories, '
+        \   printf("%d - %s", v:key+1, v:val.title)
+        \')
+    elseif cmdline !~# '^\d\+ - '
+        let histories = is_local ? qfsavehist#get_local_histories() :
+        \                          qfsavehist#get_histories()
+        call map(histories, 'extend(v:val, {"_histnr" : v:key+1})')
+        call filter(histories, 'v:val.title =~? a:arglead')
+        return map(histories, '
+        \   printf("%d - %s", v:val._histnr, v:val.title)
+        \')
     endif
 endfunction
 

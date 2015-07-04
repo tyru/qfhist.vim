@@ -20,6 +20,17 @@ let g:qfsavehist_max_history_count =
 \   get(g:, 'qfsavehist_max_history_count', 15)
 
 
+command! -bar -nargs=+
+\   -complete=customlist,qfsavehist#__cmd_complete__
+\   QFSetLocalHistory
+\   call qfsavehist#set_local_history(matchstr(<q-args>, '^\s*\zs\d\+'))
+
+command! -bar -nargs=+
+\   -complete=customlist,qfsavehist#__cmd_complete__
+\   QFSetHistory
+\   call qfsavehist#set_history(matchstr(<q-args>, '^\s*\zs\d\+'))
+
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
 

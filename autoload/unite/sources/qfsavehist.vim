@@ -20,7 +20,7 @@ function! s:qfhist_source.gather_candidates(args, context)
     return map(qfsavehist#get_histories(), '{
     \ "word" : printf("[%d] %s", v:key + 1, v:val.title),
     \ "abbr" : printf("[%d] %s", v:key + 1, v:val.title),
-    \ "action__command" : "call qfsavehist#set_history(" . v:key . ")",
+    \ "action__command" : "call qfsavehist#set_history(".(v:key+1).")",
     \ }')
 endfunction
 
