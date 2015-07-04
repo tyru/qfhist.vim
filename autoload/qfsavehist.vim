@@ -158,21 +158,20 @@ endfunction
 function! qfsavehist#__cmd_complete__(arglead, cmdline, cursorpos) abort
     let [cmd, cmdline] = matchlist(a:cmdline, '^\s*\(\w\+\)\s\+\(.*\)')[1:2]
     let is_local = cmd ==# 'QFSetLocalHistory'
-    if cmdline ==# ''
-        let histories = is_local ? qfsavehist#get_local_histories() :
-        \                          qfsavehist#get_histories()
-        return map(histories, '
-        \   printf("%d - %s", v:key+1, v:val.qftitle)
-        \')
-    elseif cmdline !~# '^\d\+ - '
-        let histories = is_local ? qfsavehist#get_local_histories() :
-        \                          qfsavehist#get_histories()
-        call map(histories, 'extend(v:val, {"_histnr" : v:key+1})')
-        call filter(histories, 'v:val.qftitle =~? a:arglead')
-        return map(histories, '
-        \   printf("%d - %s", v:val._histnr, v:val.qftitle)
-        \')
+    let complete_all = (cmdline ==# '')
+    let complete_filter = (cmdline !~# '^\d\+ - ')
+    if !complete_all && !complete_filter
+        return []
     endif
+    let histories = is_local ? qfsavehist#get_local_histories() :
+    \                          qfsavehist#get_histories()
+    call map(histories, 'extend(v:val, {"_histnr" : v:key+1})')
+    if complete_filter
+        call filter(histories, 'v:val.qftitle =~? a:arglead')
+    endif
+    return map(histories, '
+    \   printf("%d - %s", v:val._histnr, v:val.qftitle)
+    \')
 endfunction
 
 
