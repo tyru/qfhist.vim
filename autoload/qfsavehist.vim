@@ -6,7 +6,7 @@ set cpo&vim
 
 
 
-augroup qfsavehist-temp
+augroup qfsavehist-set
     autocmd!
 augroup END
 
@@ -45,13 +45,13 @@ function! qfsavehist#save() abort
     if s:is_location_list()
         call qfsavehist#save_loclist(0, w:quickfix_title)
     else
-        call qfsavehist#save_qflist()
+        call qfsavehist#save_qflist(w:quickfix_title)
     endif
 endfunction
 
-function! qfsavehist#save_qflist() abort
+function! qfsavehist#save_qflist(qftitle) abort
     call s:save_history(s:histories,
-    \   getqflist(), g:qfsavehist_max_history_count, w:quickfix_title)
+    \   getqflist(), g:qfsavehist_max_history_count, a:qftitle)
 endfunction
 
 " TODO: Is there a way to get location-list's
@@ -80,8 +80,8 @@ function! qfsavehist#get_histories() abort
     return copy(s:histories)
 endfunction
 
-function! qfsavehist#get_local_histories() abort
-    return copy(get(w:, 'qfsavehist_histories', []))
+function! qfsavehist#get_local_histories(winnr) abort
+    return copy(getwinvar(a:winnr, 'qfsavehist_histories', []))
 endfunction
 
 function! qfsavehist#get_history(histnr) abort
@@ -100,41 +100,52 @@ function! qfsavehist#set_history(histnr, ...) abort
     let history = s:histories[histidx]
     let args = [history.qflist] + a:000
     let ret = call('setqflist', args)
-    if &filetype ==# 'qf'
-        call s:set_quickfix_title(history.qftitle)
-    else
-        call s:set_quickfix_title_later(history.qftitle)
-    endif
+    call s:set_qftitle_event(history)
     return ret
 endfunction
 
-function! qfsavehist#get_local_history(histnr) abort
-    if !exists('w:qfsavehist_histories')
+" Set w:quickfix_title if current window is quickfix/location-list.
+" Otherwise, register autocommand to set w:quickfix_title
+" when entering the window.
+" This function is called twice, previous autocommand is unregistered.
+function! s:set_qftitle_event(history) abort
+    if &filetype ==# 'qf'
+        let w:quickfix_title = a:history.qftitle
+        autocmd! qfsavehist-set
+    else
+        autocmd! qfsavehist-set
+        execute 'autocmd qfsavehist-set WinEnter *'
+        \       'call s:set_qftitle_event(' . string(a:history.qftitle) . ')'
+    endif
+endfunction
+
+function! qfsavehist#get_local_history(winnr, histnr) abort
+    let NO_ITEM = []
+    let histories = getwinvar(a:winnr, 'qfsavehist_histories', NO_ITEM)
+    if histories is NO_ITEM
         throw 'qfsavehist: no histories.'
     endif
     let histidx = a:histnr - 1
-    if histidx < 0 || histidx >= len(w:qfsavehist_histories)
+    if histidx < 0 || histidx >= len(histories)
         throw 'qfsavehist: out of range.'
     endif
-    return w:qfsavehist_histories[histidx]
+    return histories[histidx]
 endfunction
 
 function! qfsavehist#set_local_history(winnr, histnr, ...) abort
-    if !exists('w:qfsavehist_histories')
+    let NO_ITEM = []
+    let histories = getwinvar(a:winnr, 'qfsavehist_histories', NO_ITEM)
+    if histories is NO_ITEM
         throw 'qfsavehist: no histories.'
     endif
     let histidx = a:histnr - 1
-    if histidx < 0 || histidx >= len(w:qfsavehist_histories)
+    if histidx < 0 || histidx >= len(histories)
         throw 'qfsavehist: out of range.'
     endif
-    let history = w:qfsavehist_histories[histidx]
+    let history = histories[histidx]
     let args = [a:winnr, history.qflist] + a:000
     let ret = call('setloclist', args)
-    if &filetype ==# 'qf'
-        call s:set_quickfix_title(history.qftitle)
-    else
-        call s:set_quickfix_title_later(history.qftitle)
-    endif
+    call s:set_qftitle_event(history)
     return ret
 endfunction
 
@@ -143,19 +154,6 @@ endfunction
 " Current window is locaation-list window or not?
 function! s:is_location_list() abort
     return 0
-endfunction
-
-function! s:set_quickfix_title(qftitle) abort
-    if &filetype ==# 'qf'
-        let w:quickfix_title = a:qftitle
-        autocmd! qfsavehist-temp
-    endif
-endfunction
-
-function! s:set_quickfix_title_later(qftitle) abort
-    autocmd! qfsavehist-temp
-    execute 'autocmd qfsavehist-temp WinEnter *'
-    \       'call s:set_quickfix_title(' . string(a:qftitle) . ')'
 endfunction
 
 
@@ -167,7 +165,7 @@ function! qfsavehist#__cmd_complete__(arglead, cmdline, cursorpos) abort
     if !complete_all && !complete_filter
         return []
     endif
-    let histories = is_local ? qfsavehist#get_local_histories() :
+    let histories = is_local ? qfsavehist#get_local_histories(0) :
     \                          qfsavehist#get_histories()
     call map(histories, 'extend(v:val, {"_histnr" : v:key+1})')
     if complete_filter

@@ -93,14 +93,14 @@ qfsavehist#clear_loclist({winnr})
 
 		*qfsavehist#get_histories()* *qfsavehist#get_local_histories()*
 qfsavehist#get_histories()
-qfsavehist#get_local_histories()
+qfsavehist#get_local_histories({winnr})
 	Gets all histories of |quickfix| or |location-list|.
 	See |qfsavehist-history-structure|.
 
 			*qfsavehist#get_history()* *qfsavehist#get_local_history()*
 			*qfsavehist#set_history()* *qfsavehist#set_local_history()*
 qfsavehist#get_history({histnr})
-qfsavehist#get_local_history({histnr})
+qfsavehist#get_local_history({winnr}, {histnr})
 qfsavehist#set_history({histnr})
 qfsavehist#set_local_history({winnr}, {histnr})
 	Gets/Sets specified history of |quickfix| or |location-list|.
