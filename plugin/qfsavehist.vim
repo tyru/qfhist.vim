@@ -30,8 +30,18 @@ command! -bar -nargs=+
 
 command! -bar -nargs=+
 \   -complete=customlist,qfsavehist#__cmd_complete__
+\   QFOpenLocalHistory
+\   call qfsavehist#open_local_history(0, matchstr(<q-args>, '^\s*\zs\d\+'))
+
+command! -bar -nargs=+
+\   -complete=customlist,qfsavehist#__cmd_complete__
 \   QFSetHistory
 \   call qfsavehist#set_history(matchstr(<q-args>, '^\s*\zs\d\+'))
+
+command! -bar -nargs=+
+\   -complete=customlist,qfsavehist#__cmd_complete__
+\   QFOpenHistory
+\   call qfsavehist#open_history(matchstr(<q-args>, '^\s*\zs\d\+'))
 
 command! -bar -nargs=0
 \   QFClearHistories

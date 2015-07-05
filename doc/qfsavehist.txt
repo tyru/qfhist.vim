@@ -53,8 +53,16 @@ COMMANDS					*qfsavehist-commands* {{{
 	You can complete the content (|w:quickfix_title|) of histories
 	by pressing <Tab> (|wildchar|) at command-line.
 
+:QFOpenHistory {histnr} [...]				*:QFOpenHistory*
+	Almost same as |:QFSetHistory| but
+	executes |:copen| or |:lopen| after setting |quickfix|.
+
 :QFSetLocalHistory {histnr} [...]			*:QFSetLocalHistory*
 	The |location-list| version of |:QFSetHistory|.
+	This sets current window's |location-list|.
+
+:QFOpenLocalHistory {histnr} [...]			*:QFOpenLocalHistory*
+	The |location-list| version of |:QFOpenHistory|.
 	This sets current window's |location-list|.
 
 :QFClearHistories							*:QFClearHistories*
@@ -100,6 +108,12 @@ qfsavehist#set_local_history({winnr}, {histnr})
 <	is 1.
 	{winnr} is a window number which is |location-list| window,
 	or which |location-list| window belongs to.
+
+			*qfsavehist#open_history()* *qfsavehist#open_local_history()*
+qfsavehist#open_history({histnr})
+qfsavehist#open_local_history({winnr}, {histnr})
+	Executes |:copen| or |:lopen| after calling
+	|qfsavehist#set_history()| or |qfsavehist#set_local_history()|.
 
 }}}
 }}}

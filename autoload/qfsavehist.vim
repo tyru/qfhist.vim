@@ -46,11 +46,21 @@ function! qfsavehist#set_history(histnr) abort
     return ret
 endfunction
 
+function! qfsavehist#open_history(histnr) abort
+    call qfsavehist#set_history(a:histnr)
+    copen
+endfunction
+
 function! qfsavehist#set_local_history(winnr, histnr) abort
     let history = qfsavehist#get_history(a:histnr)
     let ret = setloclist(a:winnr, history.qflist)
     call s:set_quickfix_title(history.qftitle, a:winnr)
     return ret
+endfunction
+
+function! qfsavehist#open_local_history(winnr, histnr) abort
+    call qfsavehist#set_local_history(a:winnr, a:histnr)
+    lopen
 endfunction
 
 function! qfsavehist#__cmd_complete__(arglead, cmdline, cursorpos) abort
