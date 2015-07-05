@@ -88,7 +88,7 @@ qfsavehist#get_histories()		*qfsavehist#get_histories()*
 	Gets all |quickfix-error-lists| histories.
 	See |qfsavehist-history-structure|.
 
-			*qfsavehist#get_history()* *qfsavehist#get_local_history()*
+			*qfsavehist#get_history()*
 			*qfsavehist#set_history()* *qfsavehist#set_local_history()*
 qfsavehist#get_history({histnr})
 qfsavehist#set_history({histnr})
