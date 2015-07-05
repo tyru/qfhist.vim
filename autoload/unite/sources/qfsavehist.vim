@@ -33,10 +33,10 @@ let s:qfhist_local_source = {
       \}
 
 function! s:qfhist_local_source.gather_candidates(args, context)
-    return map(qfsavehist#get_local_histories(0), '{
+    return map(qfsavehist#get_histories(), '{
     \ "word" : printf("[%d] %s", v:key + 1, v:val.qftitle),
     \ "abbr" : printf("[%d] %s", v:key + 1, v:val.qftitle),
-    \ "action__command" : "call qfsavehist#set_local_history(" . v:key . ")",
+    \ "action__command" : "call qfsavehist#set_local_history(0, " . v:key . ")",
     \ }')
 endfunction
 

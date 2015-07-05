@@ -47,23 +47,26 @@ g:qfsavehist_max_history_count
 COMMANDS					*qfsavehist-commands* {{{
 
 :QFSetHistory {histnr} [...]				*:QFSetHistory*
-	Set |quickfix| history by given history number.
+	Sets |quickfix| history by given history number.
 	Rest arguments are ignored.
 	NOTE: history number is 1-origin.
 	You can complete the content (|w:quickfix_title|) of histories
 	by pressing <Tab> (|wildchar|) at command-line.
 
-:QFSetLocalHistory {histnr} [...]				*:QFSetLocalHistory*
+:QFSetLocalHistory {histnr} [...]			*:QFSetLocalHistory*
 	The |location-list| version of |:QFSetHistory|.
+	This sets current window's |location-list|.
+
+:QFClearHistories							*:QFClearHistories*
+	Clears all |quickfix-error-lists| histories.
 
 }}}
 ------------------------------------------------------------------------------
 FUNCTIONS						*qfsavehist-functions* {{{
 
-	*qfsavehist#save()* *qfsavehist#save_qflist()* *qfsavehist#save_loclist()*
-qfsavehist#save()
+	*qfsavehist#save_qflist()* *qfsavehist#save_loclist()*
 qfsavehist#save_qflist()
-qfsavehist#save_loclist({winnr}, {qftitle})
+qfsavehist#save_loclist({winnr})
 	Saves current |quickfix| or |location-list| history.
 	These functions must be called while current window is
 	|quickfix| or |location-list| window.
@@ -77,30 +80,17 @@ qfsavehist#save_loclist({winnr}, {qftitle})
 	|qfsavehist#save_loclist()| is the |location-list| version
 	of |qfsavehist#save_qflist()|.
 	{winnr} is a window number where |location-list| window belongs to.
-	{qftitle} is a string to set to |w:quickfix_title|.
 
-	*qfsavehist#clear()* *qfsavehist#clear_qflist()* *qfsavehist#clear_loclist()*
-qfsavehist#clear()
-qfsavehist#clear_qflist()
-qfsavehist#clear_loclist({winnr})
-	Clears current |quickfix| or |location-list| history.
-	These functions must be called while current window is
-	|quickfix| or |location-list| window.
+qfsavehist#clear()			*qfsavehist#clear()*
+	Clears all |quickfix-error-lists| histories.
 
-	|qfsavehist#clear_loclist()| is the |location-list| version
-	of |qfsavehist#clear_qflist()|.
-	{winnr} is a window number where |location-list| window belongs to.
-
-		*qfsavehist#get_histories()* *qfsavehist#get_local_histories()*
-qfsavehist#get_histories()
-qfsavehist#get_local_histories({winnr})
-	Gets all histories of |quickfix| or |location-list|.
+qfsavehist#get_histories()		*qfsavehist#get_histories()*
+	Gets all |quickfix-error-lists| histories.
 	See |qfsavehist-history-structure|.
 
 			*qfsavehist#get_history()* *qfsavehist#get_local_history()*
 			*qfsavehist#set_history()* *qfsavehist#set_local_history()*
 qfsavehist#get_history({histnr})
-qfsavehist#get_local_history({winnr}, {histnr})
 qfsavehist#set_history({histnr})
 qfsavehist#set_local_history({winnr}, {histnr})
 	Gets/Sets specified history of |quickfix| or |location-list|.
@@ -108,7 +98,8 @@ qfsavehist#set_local_history({winnr}, {histnr})
 	NOTE: {histnr} is 1-origin. Thus: >
 		qfsavehist#get_history(1) ==# qfsavehist#get_histories()[0]
 <	is 1.
-	{winnr} is a window number where |location-list| window belongs to.
+	{winnr} is a window number which is |location-list| window,
+	or which |location-list| window belongs to.
 
 }}}
 }}}
@@ -116,12 +107,17 @@ qfsavehist#set_local_history({winnr}, {histnr})
 HISTORY STRUCTURE							*qfsavehist-history-structure* {{{
 >
 	{
-		'qflist' : {quickfix/location-list list},
-		'qftitle' : {quickfix/location-list's title},
+		'histid' : {String, quickfix/location-list list},
+		'qflist' : {List, quickfix/location-list list},
+		'qftitle' : {String, quickfix/location-list's title},
+		'is_local' : {Boolean, local errorlist or not},
 	}
 <
+	{histid} is a ID of a history.
 	{qflist} is a |List| from |getqflist()| or |getloclist()|.
 	{qftitle} is a |String| from |w:quickfix_title|.
+	{is_local} is a Boolean which represents local errorlist or not.
+
 	A history number is not included because it is a sliding number.
 
 }}}
