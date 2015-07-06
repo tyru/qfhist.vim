@@ -4,7 +4,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-function! unite#sources#qfsavehist#define()
+function! unite#sources#qfhist#define()
   return [s:qfhist_source, s:qfhist_local_source]
 endfunction"}}}
 
@@ -17,10 +17,10 @@ let s:qfhist_source = {
       \}
 
 function! s:qfhist_source.gather_candidates(args, context)
-    return map(qfsavehist#get_histories(), '{
+    return map(qfhist#get_histories(), '{
     \ "word" : printf("[%d] %s", v:key + 1, v:val.qftitle),
     \ "abbr" : printf("[%d] %s", v:key + 1, v:val.qftitle),
-    \ "action__command" : "call qfsavehist#set_history(".(v:key+1).")",
+    \ "action__command" : "call qfhist#set_history(".(v:key+1).")",
     \ }')
 endfunction
 
@@ -33,10 +33,10 @@ let s:qfhist_local_source = {
       \}
 
 function! s:qfhist_local_source.gather_candidates(args, context)
-    return map(qfsavehist#get_histories(), '{
+    return map(qfhist#get_histories(), '{
     \ "word" : printf("[%d] %s", v:key + 1, v:val.qftitle),
     \ "abbr" : printf("[%d] %s", v:key + 1, v:val.qftitle),
-    \ "action__command" : "call qfsavehist#set_local_history(0, " . v:key . ")",
+    \ "action__command" : "call qfhist#set_local_history(0, " . v:key . ")",
     \ }')
 endfunction
 

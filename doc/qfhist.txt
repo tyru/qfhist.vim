@@ -1,22 +1,22 @@
-*qfsavehist.txt* *qfsavehist* Quickfix/Location-list history like Eclipse's search history
+*qfhist.txt* *qfhist* Quickfix/Location-list history like Eclipse's search history
 
 Author: tyru <tyru.exe@gmail.com>
 Version: 0.0.1
 License: MIT
 
 ==============================================================================
-CONTENTS						*qfsavehist-contents*
+CONTENTS						*qfhist-contents*
 
-Introduction		|qfsavehist-introduction|
-Interface			|qfsavehist-interface|
-  Variables			|qfsavehist-variables|
-  Commands			|qfsavehist-commands|
-  Functions			|qfsavehist-functions|
-Changelog			|qfsavehist-changelog|
+Introduction		|qfhist-introduction|
+Interface			|qfhist-interface|
+  Variables			|qfhist-variables|
+  Commands			|qfhist-commands|
+  Functions			|qfhist-functions|
+Changelog			|qfhist-changelog|
 
 
 ==============================================================================
-INTRODUCTION						*qfsavehist-introduction* {{{
+INTRODUCTION						*qfhist-introduction* {{{
 
 This plugin saves |quickfix| and |location-list| history.
 So you can remember old histories of |quickfix| and |location-list|
@@ -24,18 +24,18 @@ without searching again.
 
 }}}
 ==============================================================================
-INTERFACE							*qfsavehist-interface* {{{
+INTERFACE							*qfhist-interface* {{{
 ------------------------------------------------------------------------------
-VARIABLES					*qfsavehist-variables* {{{
+VARIABLES					*qfhist-variables* {{{
 
-					*g:qfsavehist_auto_save*
-g:qfsavehist_auto_save
+					*g:qfhist_auto_save*
+g:qfhist_auto_save
 								(default: 1)
 	If this value is non-zero,
-	|qfsavehist#save()| is performed at every |QuickfixCmdPost| event.
+	|qfhist#save()| is performed at every |QuickfixCmdPost| event.
 
-					*g:qfsavehist_max_history_count*
-g:qfsavehist_max_history_count
+					*g:qfhist_max_history_count*
+g:qfhist_max_history_count
 								(default: 15)
 	Saves histories up to this count.
 	If the number of histories exceeds this count,
@@ -44,7 +44,7 @@ g:qfsavehist_max_history_count
 
 }}}
 ------------------------------------------------------------------------------
-COMMANDS					*qfsavehist-commands* {{{
+COMMANDS					*qfhist-commands* {{{
 
 :QFSetHistory {histnr} [...]				*:QFSetHistory*
 	Sets |quickfix| history by given history number.
@@ -70,55 +70,55 @@ COMMANDS					*qfsavehist-commands* {{{
 
 }}}
 ------------------------------------------------------------------------------
-FUNCTIONS						*qfsavehist-functions* {{{
+FUNCTIONS						*qfhist-functions* {{{
 
-	*qfsavehist#save_qflist()* *qfsavehist#save_loclist()*
-qfsavehist#save_qflist()
-qfsavehist#save_loclist({winnr})
+	*qfhist#save_qflist()* *qfhist#save_loclist()*
+qfhist#save_qflist()
+qfhist#save_loclist({winnr})
 	Saves current |quickfix| or |location-list| history.
 	These functions must be called while current window is
 	|quickfix| or |location-list| window.
 
-	|qfsavehist#save()| calls |qfsavehist#save_qflist()|
+	|qfhist#save()| calls |qfhist#save_qflist()|
 	if current window is |quickfix| window.
-	Or, |qfsavehist#save()| calls |qfsavehist#save_loclist()|
+	Or, |qfhist#save()| calls |qfhist#save_loclist()|
 	if current window is |location-list| window
 	with current window number.
 
-	|qfsavehist#save_loclist()| is the |location-list| version
-	of |qfsavehist#save_qflist()|.
+	|qfhist#save_loclist()| is the |location-list| version
+	of |qfhist#save_qflist()|.
 	{winnr} is a window number where |location-list| window belongs to.
 
-qfsavehist#clear()			*qfsavehist#clear()*
+qfhist#clear()			*qfhist#clear()*
 	Clears all |quickfix-error-lists| histories.
 
-qfsavehist#get_histories()		*qfsavehist#get_histories()*
+qfhist#get_histories()		*qfhist#get_histories()*
 	Gets all |quickfix-error-lists| histories.
-	See |qfsavehist-history-structure|.
+	See |qfhist-history-structure|.
 
-			*qfsavehist#get_history()*
-			*qfsavehist#set_history()* *qfsavehist#set_local_history()*
-qfsavehist#get_history({histnr})
-qfsavehist#set_history({histnr})
-qfsavehist#set_local_history({winnr}, {histnr})
+			*qfhist#get_history()*
+			*qfhist#set_history()* *qfhist#set_local_history()*
+qfhist#get_history({histnr})
+qfhist#set_history({histnr})
+qfhist#set_local_history({winnr}, {histnr})
 	Gets/Sets specified history of |quickfix| or |location-list|.
-	See |qfsavehist-history-structure|.
+	See |qfhist-history-structure|.
 	NOTE: {histnr} is 1-origin. Thus: >
-		qfsavehist#get_history(1) ==# qfsavehist#get_histories()[0]
+		qfhist#get_history(1) ==# qfhist#get_histories()[0]
 <	is 1.
 	{winnr} is a window number which is |location-list| window,
 	or which |location-list| window belongs to.
 
-			*qfsavehist#open_history()* *qfsavehist#open_local_history()*
-qfsavehist#open_history({histnr})
-qfsavehist#open_local_history({winnr}, {histnr})
+			*qfhist#open_history()* *qfhist#open_local_history()*
+qfhist#open_history({histnr})
+qfhist#open_local_history({winnr}, {histnr})
 	Executes |:copen| or |:lopen| after calling
-	|qfsavehist#set_history()| or |qfsavehist#set_local_history()|.
+	|qfhist#set_history()| or |qfhist#set_local_history()|.
 
 }}}
 }}}
 ==============================================================================
-HISTORY STRUCTURE							*qfsavehist-history-structure* {{{
+HISTORY STRUCTURE							*qfhist-history-structure* {{{
 >
 	{
 		'histid' : {String, quickfix/location-list list},
@@ -136,7 +136,7 @@ HISTORY STRUCTURE							*qfsavehist-history-structure* {{{
 
 }}}
 ==============================================================================
-CHANGELOG							*qfsavehist-changelog* {{{
+CHANGELOG							*qfhist-changelog* {{{
 
 0.0.1:
 - ...

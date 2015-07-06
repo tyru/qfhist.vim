@@ -1,4 +1,4 @@
-# qfsavehist.vim
+# qfhist.vim
 
 This plugin saves quickfix and location-list histories.<br/>
 So you can invoke old histories of quickfix and location-list

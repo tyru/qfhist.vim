@@ -11,66 +11,66 @@ let s:histories = []
 " Number
 let s:max_histid = 0
 
-function! qfsavehist#clear() abort
+function! qfhist#clear() abort
     let s:histories = []
 endfunction
 
-function! qfsavehist#save_loclist(winnr) abort
+function! qfhist#save_loclist(winnr) abort
     let qftitle = s:get_quickfix_title(a:winnr)
     call s:save_history(s:histories,
-    \   getloclist(a:winnr), g:qfsavehist_max_history_count, qftitle, 1)
+    \   getloclist(a:winnr), g:qfhist_max_history_count, qftitle, 1)
 endfunction
 
-function! qfsavehist#save_qflist() abort
+function! qfhist#save_qflist() abort
     let qftitle = s:get_quickfix_title(-1)
     call s:save_history(s:histories,
-    \   getqflist(), g:qfsavehist_max_history_count, qftitle, 0)
+    \   getqflist(), g:qfhist_max_history_count, qftitle, 0)
 endfunction
 
-function! qfsavehist#get_histories() abort
+function! qfhist#get_histories() abort
     return copy(s:histories)
 endfunction
 
-function! qfsavehist#get_history(histnr) abort
+function! qfhist#get_history(histnr) abort
     let histidx = a:histnr - 1
     if histidx < 0 || histidx >= len(s:histories)
-        throw 'qfsavehist: out of range.'
+        throw 'qfhist: out of range.'
     endif
     return s:histories[histidx]
 endfunction
 
-function! qfsavehist#set_history(histnr) abort
-    let history = qfsavehist#get_history(a:histnr)
+function! qfhist#set_history(histnr) abort
+    let history = qfhist#get_history(a:histnr)
     let ret = setqflist(history.qflist)
     call s:set_quickfix_title(history.qftitle, -1)
     return ret
 endfunction
 
-function! qfsavehist#open_history(histnr) abort
-    call qfsavehist#set_history(a:histnr)
+function! qfhist#open_history(histnr) abort
+    call qfhist#set_history(a:histnr)
     copen
 endfunction
 
-function! qfsavehist#set_local_history(winnr, histnr) abort
-    let history = qfsavehist#get_history(a:histnr)
+function! qfhist#set_local_history(winnr, histnr) abort
+    let history = qfhist#get_history(a:histnr)
     let ret = setloclist(a:winnr, history.qflist)
     call s:set_quickfix_title(history.qftitle, a:winnr)
     return ret
 endfunction
 
-function! qfsavehist#open_local_history(winnr, histnr) abort
-    call qfsavehist#set_local_history(a:winnr, a:histnr)
+function! qfhist#open_local_history(winnr, histnr) abort
+    call qfhist#set_local_history(a:winnr, a:histnr)
     lopen
 endfunction
 
-function! qfsavehist#__cmd_complete__(arglead, cmdline, cursorpos) abort
+function! qfhist#__cmd_complete__(arglead, cmdline, cursorpos) abort
     let [cmd, cmdline] = matchlist(a:cmdline, '^\s*\(\w\+\)\s\+\(.*\)')[1:2]
     let complete_all = (cmdline ==# '')
     let complete_filter = (cmdline !~# '^\d\+ - ')
     if !complete_all && !complete_filter
         return []
     endif
-    let histories = qfsavehist#get_histories()
+    let histories = qfhist#get_histories()
     call map(histories, 'extend(v:val, {"_histnr" : v:key+1})')
     if complete_filter
         call filter(histories, 'v:val.qftitle =~? a:arglead')
@@ -134,8 +134,8 @@ function! s:call_in_quickfix_window(winnr, func, args) abort
     let eventignore = &eventignore
     set eventignore=all
     try
-        windo let w:qfsavehist_checkwin = 0
-        call setwinvar(oldwinnr, 'qfsavehist_checkwin', 1)
+        windo let w:qfhist_checkwin = 0
+        call setwinvar(oldwinnr, 'qfhist_checkwin', 1)
         if a:winnr >=# 0
             if a:winnr ># 0
                 execute a:winnr 'wincmd w'
@@ -150,7 +150,7 @@ function! s:call_in_quickfix_window(winnr, func, args) abort
             " quickfix/location-list window was not opened.
             execute (a:winnr >=# 0 ? 'lclose' : 'cclose')
         endif
-        windo unlet! w:qfsavehist_checkwin
+        windo unlet! w:qfhist_checkwin
         execute oldwinnr 'wincmd w'
         let &eventignore = eventignore
     endtry
